@@ -7,7 +7,20 @@ const BUILD_DIRECTORY = 'dist';
 const PRODUCTION = process.env.NODE_ENV === 'production';
 
 // Config entrypoint files
-const ENTRY_POINTS = ['src/index.ts'];
+const ENTRY_POINTS = [
+  'src/index.ts',
+  'src/agudah.ts',
+  'src/einsAnimation.ts',
+  'src/tq.ts',
+  'src/dub.ts',
+  'src/fetcherr.ts',
+  'src/modeSwitch.ts',
+  'src/popUpslide.ts',
+  'src/new_index.ts',
+  'src/techloqPricing.ts',
+  'src/gsap-anim.ts',
+  'src/select-formRender.ts',
+];
 
 // Config dev serving
 const LIVE_RELOAD = !PRODUCTION;

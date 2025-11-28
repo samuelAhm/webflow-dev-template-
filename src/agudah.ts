@@ -3,17 +3,34 @@ window.Webflow ||= [];
 window.Webflow.push(() => {
   console.log('agudah');
 
-  // ScrollTrigger.refresh();
+  const showMoreBtn = document.querySelector('[show-morebtn]');
+  const newsContainer = document.querySelector('.news-blk-wrap');
 
-  const triggetBtn = [...document.querySelectorAll('[btn-trigger]')];
+  const cateItems = document.querySelectorAll('[glide-in]');
 
-  triggetBtn.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      //get the parent el of the clicked button
-      const parentEl = btn.parentElement;
-      parentEl?.classList.toggle('active');
+  cateItems.forEach((cate) => {
+    cate.addEventListener('click', (e) => {
+      newsContainer.style.height = `auto`;
+      showMoreBtn.style.display = `none`;
     });
   });
+
+  showMoreBtn?.addEventListener('click', function () {
+    newsContainer.style.height = `auto`;
+    this.style.display = `none`;
+  });
+
+  // ScrollTrigger.refresh();
+
+  // const triggetBtn = [...document.querySelectorAll('[btn-trigger]')];
+
+  // triggetBtn.forEach((btn) => {
+  //   btn.addEventListener('click', () => {
+  //     //get the parent el of the clicked button
+  //     const parentEl = btn.parentElement;
+  //     parentEl?.classList.toggle('active');
+  //   });
+  // });
 
   // const slideTrigger = document.querySelector('.legacy--section');
   // const mbTrigger = document.querySelector('.img-slide-wrap');
@@ -58,7 +75,8 @@ window.Webflow.push(() => {
   //     duration: 3,
   //     ease: 'expo.out',
   //     stagger: { amount: 0.1 },
-  //   }).from(
+  //   }).from(div
+
   //     '[hero-video]',
   //     {
   //       autoAlpha: 0,
@@ -379,4 +397,146 @@ window.Webflow.push(() => {
   // paymentAPI();
   // multiForm();
   // dropDownFunction();
+});
+
+////Agudah script
+
+window.Webflow ||= [];
+window.Webflow.push(() => {
+  gsap.registerPlugin(ScrollTrigger);
+
+  ScrollTrigger.refresh();
+
+  //split text
+  const typeSplit = new SplitType('[text-split]', {
+    types: 'lines, words',
+    tagName: 'span',
+  });
+
+  const allTexts = gsap.utils.toArray('.h-heading');
+
+  //link timeslines to scroll postion
+  const createScrollTrigger = function (triggerElement, timeline) {
+    //play tl when scrolled into view (60% from top of screen)
+    ScrollTrigger.create({
+      trigger: triggerElement,
+      start: 'top 70%',
+      onEnter: () => timeline.play(),
+    });
+  };
+
+  gsap.set('[text-split]', { autoAlpha: 1, delay: 0.1 });
+
+  gsap.set(allTexts[0], { position: 'static', display: 'block' });
+
+  $('[words-slide-up]').each(function (index) {
+    const tl = gsap.timeline({ paused: true });
+    tl.from($(this).find('.word'), {
+      autoAlpha: 0,
+      yPercent: 100,
+      duration: 2.5,
+      ease: 'expo.out',
+      stagger: { amount: 0.05 },
+    });
+    createScrollTrigger($(this), tl);
+  });
+
+  const animDurationTime = 1.5;
+  const animDelay = 1.5;
+
+  //PAGE LOAD ANIMATIONS
+  const tl = gsap.timeline();
+  const textTl = gsap.timeline({ paused: true, repeat: -1 });
+
+  function init() {
+    allTexts.forEach((word) => {
+      const slidedWords = [...word.querySelectorAll('.word')].splice(2);
+
+      //$(word).find('.word')
+      const tl = gsap.timeline({});
+
+      tl.set(word, { position: 'static', visibility: 'visible', display: 'inline-block' })
+        .from(slidedWords, {
+          yPercent: 100,
+          duration: animDurationTime,
+          ease: 'expo.out',
+        })
+        .to(slidedWords, {
+          yPercent: -100,
+          duration: animDurationTime,
+          delay: animDelay,
+          ease: 'expo.out',
+        })
+        .set(word, { position: 'absolute', visibility: 'hidden' });
+      textTl.add(tl);
+    });
+
+    const firstParagraph = allTexts[0];
+    const firsTwoWords = [...firstParagraph.querySelectorAll('.word')].slice(0, 2);
+
+    tl.from(firsTwoWords, {
+      // autoAlpha: 0,
+      yPercent: 100,
+      duration: animDurationTime,
+      ease: 'expo.out',
+      stagger: { amount: 0.1 },
+      onComplete: function () {
+        console.log('complete');
+        textTl.play();
+      },
+    }).from(
+      '[hero-video]',
+      {
+        autoAlpha: 0,
+        yPercent: 100,
+        duration: 3,
+        ease: 'expo.out',
+      },
+      '<0.0'
+    );
+  }
+
+  init();
+
+  addEventListener('resize', (e) => {
+    textTl.restart();
+    gsap.set(allTexts[0], { position: 'static', display: 'block' });
+  });
+
+  const cardSlide = gsap.utils.toArray('[slide-card]');
+  const cardTrigger = document.querySelector('[update-section]');
+
+  const newsTl = gsap.timeline({
+    defaults: { duration: 3.5, ease: 'expo.out', stagger: 0.1, autoAlpha: 0 },
+    scrollTrigger: {
+      trigger: cardTrigger,
+      //markers: true,
+      start: 'top 70%',
+    },
+  });
+
+  newsTl.from(
+    cardSlide,
+    {
+      yPercent: 50,
+      delay: 0.5,
+    },
+    0
+  );
+});
+
+// Initialize Swiper
+const testiSlide = new Swiper('#testiSlide', {
+  slidesPerView: 1,
+  speed: 1000,
+  breakpoints: {
+    // when window width is >= 480px
+    480: {
+      slidesPerView: 3,
+    },
+  },
+  navigation: {
+    nextEl: '.next-btn',
+    prevEl: '.prev-btn',
+  },
 });

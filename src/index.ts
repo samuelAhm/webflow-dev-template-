@@ -1095,3 +1095,355 @@ window.Webflow.push(() => {
   //   });
   // }
 });
+
+console.log('snapautos_your-offer.html');
+
+const profileObject = JSON.parse(localStorage.getItem('sa_profObj'));
+console.log(profileObject);
+console.log('cdcd');
+
+let step3path = null;
+
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.getElementById('wf-form-Vehicle-Mileage');
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    window.location.href = step3path;
+  });
+});
+
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0,
+      v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+// Function to get a URL parameter by name
+function getUrlParameter(name) {
+  name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+  const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+  const results = regex.exec(location.search);
+  return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+}
+
+// Function to decode Base64url data
+function base64urlDecode(data) {
+  data = data.replace(/-/g, '+').replace(/_/g, '/');
+  while (data.length % 4) {
+    data += '=';
+  }
+  const base64 = atob(data);
+  return base64;
+}
+
+function appendHtml(html) {
+  // Get the form by its ID
+  const form = document.getElementById('email-form');
+  // Find all label elements within the form
+  const labels = form.getElementsByTagName('label');
+  // Define a variable for the target element under which the HTML will be appended
+  let targetElement;
+
+  // If no labels are found, append a 'p' element with the id 'trim-header', if it does not already exist
+  if (labels.length === 0) {
+    // Check if the 'p' element with 'trim-header' ID already exists
+    const existingP = document.getElementById('trim-header');
+    if (!existingP) {
+      // If it doesn't exist, create it and append to the form
+      const paragraph = document.createElement('p');
+      paragraph.id = 'trim-header';
+      form.appendChild(paragraph);
+      targetElement = paragraph;
+    } else {
+      // If it exists, use the existing 'p' element as the target
+      targetElement = existingP;
+    }
+  } else {
+    // If labels are present, use the last label as the target
+    targetElement = labels[labels.length - 1];
+  }
+
+  // Create a container for the new HTML
+  const container = document.createElement('div');
+  // Set the innerHTML of the container to the provided HTML string
+  container.innerHTML = html;
+  // Append the new HTML under the target element
+  targetElement.parentNode.insertBefore(container.firstChild, targetElement.nextSibling);
+}
+// Function to encode data as Base64url
+function base64urlEncode(data) {
+  const base64 = btoa(data);
+  const base64url = base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return base64url;
+}
+
+function isArray(data) {
+  return Array.isArray(data);
+}
+
+function updatePath(updatedProfileObject) {
+  localStorage.setItem('sa_profObj', JSON.stringify(updatedProfileObject));
+  const jsonString = JSON.stringify(updatedProfileObject);
+  const encodedData = base64urlEncode(unescape(encodeURIComponent(jsonString)));
+  console.log(encodedData);
+  $('#email-form').attr('redirect', `/your-offer-condition?id=${encodedData}`);
+  $('#email-form').attr('data-redirect', `/your-offer-condition?id=${encodedData}`);
+  $('#email-form').attr('action', `/your-offer-condition?id=${encodedData}`);
+  step3path = `/your-offer-condition?id=${encodedData}`;
+}
+
+$(document).ready(function () {
+  if (profileObject.hasOwnProperty('year')) {
+    $('#vehicle-info').text(`${profileObject.year} ${profileObject.make} ${profileObject.model}`);
+    if (typeof profileObject.vin !== 'undefined') {
+      $('#vin-info').text(`${profileObject.vin}`);
+    } else {
+      $('#vin-info').text(``);
+    }
+  } else {
+    if (profileObject.hasOwnProperty('vehicle')) {
+      $('#vehicle-info').text(
+        `${profileObject.vehicle.year} ${profileObject.vehicle.make} ${profileObject.vehicle.model}`
+      );
+      if (typeof profileObject.vehicle.vin !== 'undefined') {
+        $('#vin-info').text(`${profileObject.vehicle.vin}`);
+      } else {
+        $('#vin-info').text(``);
+      }
+    } else {
+      $('#vehicle-info').text(``);
+      $('#vin-info').text(``);
+    }
+  }
+
+  $('#toptitle').text('New word');
+  const id = getUrlParameter('id');
+  // Assume encodedData is received on the other end...
+  // Step 3: Decode the Base64url string
+  const decodedString = decodeURIComponent(escape(base64urlDecode(id)));
+  console.log(decodedString); // Output: JSON string
+
+  // Step 4: Parse the JSON string back into a JSON object
+  //var profileObject = JSON.parse(decodedString);
+  profileObject.uuid = generateUUID();
+
+  $('#uuid').val(profileObject.uuid);
+  console.log(profileObject); // Output: JSON object
+
+  radioID = 1;
+
+  if (profileObject.hasOwnProperty('trims')) {
+    profileObject.trims.forEach((trim) => {
+      // Define the HTML string
+      const htmlString = `<label class="radio-button-field w-radio"><div class="w-form-formradioinput w-form-formradioinput--inputType-custom radio-button w-radio-input"></div><input type="radio" id="${radioID}" name="trim" value="${trim}" data-name="*trim" style="opacity:0;position:absolute;z-index:-1"><span class="radio-button-label-3 w-form-label" for="radio">${trim}</span></label>`;
+      // Call the function with the HTML to append
+      appendHtml(htmlString);
+
+      radioID += 1;
+    });
+  } else if (profileObject.hasOwnProperty('vehicle') && isArray(profileObject.vehicle) == false) {
+    // Define the HTML string
+    var htmlString = `<label class="radio-button-field w-radio"><div class="w-form-formradioinput w-form-formradioinput--inputType-custom radio-button w-radio-input"></div><input type="radio" id="${radioID}" name="trim" value="${profileObject.vehicle.trim}" data-name="*trim" style="opacity:0;position:absolute;z-index:-1"><span class="radio-button-label-3 w-form-label" for="radio">${profileObject.vehicle.trim}</span></label>`;
+    // Call the function with the HTML to append
+    appendHtml(htmlString);
+  } else if (profileObject.hasOwnProperty('vehicles') && isArray(profileObject.vehicles)) {
+    profileObject.vehicles.forEach((vehicle) => {
+      console.log('ss');
+      // Define the HTML string
+      const htmlString = `<label class="radio-button-field w-radio"><div class="w-form-formradioinput w-form-formradioinput--inputType-custom radio-button w-radio-input"></div><input type="radio" 
+                  id="${radioID}" name="trim" value="${vehicle.trim}" data-name="*trim" style="opacity:0;position:absolute;z-index:-1"><span class="radio-button-label-3 w-form-label" for="radio">${vehicle.trim}</span></label>`;
+      // Call the function with the HTML to append
+      appendHtml(htmlString);
+
+      radioID += 1;
+    });
+  } else {
+    // Define the HTML string
+    var htmlString = `<label class="radio-button-field w-radio"><div class="w-form-formradioinput w-form-formradioinput--inputType-custom radio-button w-radio-input"></div><input type="radio" id="${radioID}" name="trim" value="${profileObject.trim}" data-name="*trim" style="opacity:0;position:absolute;z-index:-1"><span class="radio-button-label-3 w-form-label" for="radio">${profileObject.trim}</span></label>`;
+    // Call the function with the HTML to append
+    appendHtml(htmlString);
+  }
+
+  // Use jQuery to bind a change event to the radio buttons with the name 'trim'
+  $('input[type=radio][name=trim]').change(function () {
+    // Update the 'selectedTrim' variable with the value of the checked radio button
+    profileObject.selectedTrim = this.value;
+
+    // Log the selected value to the console (for debugging purposes)
+    console.log('Selected trim:', profileObject.selectedTrim);
+    updatePath(profileObject);
+  });
+
+  $('#vehicle-mileage').on('input', function () {
+    // Update the 'test' variable with the value of the textbox
+    profileObject.vehicleMileage = $(this).val();
+    updatePath(profileObject);
+  });
+
+  $('#vehicle-zipcode').on('input', function () {
+    // Update the 'test' variable with the value of the textbox
+    profileObject.vehicleZipcode = $(this).val();
+    updatePath(profileObject);
+  });
+});
+
+// <script type="text/javascript">
+
+//     $("#ymm-continue").prop("disabled", true);
+
+// var step2path = '/your-offer?yep=cdcd';
+
+// var step2payload = {
+//     'year': null,
+//   'make': null,
+//   'model': null,
+//   'trims': null
+// }
+// // Function to encode data as Base64url
+// function base64urlEncode(data) {
+//     var base64 = btoa(data);
+//     var base64url = base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+//     return base64url;
+// }
+// // Function to get a URL parameter by name
+// function getUrlParameter(name) {
+//     name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+//     var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+//     var results = regex.exec(location.search);
+//     return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+// }
+
+// // Function to decode Base64url data
+// function base64urlDecode(data) {
+//     data = data.replace(/-/g, '+').replace(/_/g, '/');
+//     while (data.length % 4) {
+//         data += '=';
+//     }
+//     var base64 = atob(data);
+//     return base64;
+// }
+
+// var offerEndpoint = "https://hook.us1.make.com/ua38xfpp6huzus3vd1qd6a7c969xaqqx";
+// $(document).ready(function () {
+
+//     var found = getUrlParameter('found');
+//     // Assume encodedData is received on the other end...
+//     // Step 3: Decode the Base64url string
+//     if(found){
+//       $('#not-found').show();
+//     }
+
+//     $("#make-select").prop("disabled", true);
+//     $("#model-select").prop("disabled", true);
+
+//     axios
+//         .get(`${offerEndpoint}`, {
+//             params: {
+//               type: "DEFAULT",
+//               optionData: $(this).val()
+//             },
+//           })
+//             .then(function (response) {
+//                 $('#year-select').append($('<option>', {
+//                     value: "Select year...",
+//                     text: "Select year..."
+//                 }));
+//                 response.data.forEach((item) => {
+//                   $('#year-select').append($('<option>', {
+//                       value: item,
+//                       text: item
+//                   }));
+//                 });
+//           });
+
+//     $('#year-select').change(function() {
+//         if ($(this).val() != 'Select year...') {
+//                         step2payload.year = $(this).val()
+//           $('#make-select').empty();
+//           $('#model-select').empty();
+
+//           axios
+//             .get(`${offerEndpoint}`, {
+//             params: {
+//               type: "YEAR",
+//               optionData: $(this).val()
+//             },
+//           })
+//             .then(function (response) {
+
+//                 $("#make-select").prop("disabled", false);
+//                 $('#make-select').append($('<option>', {
+//                     value: "Select make...",
+//                     text: "Select make..."
+//                 }));
+//                 response.data.forEach((item) => {
+//                   $('#make-select').append($('<option>', {
+//                       value: item,
+//                       text: item
+//                   }));
+//                 });
+//           });
+//         }
+//     });
+
+//     $('#make-select').change(function() {
+
+//         if ($(this).val() != 'Select make...') {
+//           step2payload.make = $(this).val()
+//           $('#model-select').empty();
+
+//           axios
+//             .get(`${offerEndpoint}`, {
+//             params: {
+//               type: "MAKE",
+//               optionData: $(this).val(),
+//               optionData2: $('#year-select').val()
+//             },
+//           })
+//             .then(function (response) {
+
+//                 $("#model-select").prop("disabled", false);
+//                 $('#model-select').append($('<option>', {
+//                     value: "Select model...",
+//                     text: "Select model..."
+//                 }));
+//                 response.data.forEach((item) => {
+//                   $('#model-select').append($('<option>', {
+//                       value: item,
+//                       text: item
+//                   }));
+//                 });
+//           });
+//         }
+//     });
+
+//     $('#model-select').change(function() {
+
+//     if ($(this).val() != 'Select model...') {
+//       step2payload.model = $(this).val()
+
+//       axios
+//         .get(`${offerEndpoint}`, {
+//         params: {
+//           type: "MODEL",
+//           optionData: $('#make-select').val(),
+//           optionData2: $('#year-select').val(),
+//           optionData3: $('#model-select').val()
+//         },
+//       })
+//         .then(function (response) {
+
+//             step2payload.trims = response.data;
+//             var jsonString = JSON.stringify(step2payload);
+//             localStorage.setItem('sa_profObj', jsonString);
+
+//             var encodedData = base64urlEncode(unescape(encodeURIComponent(jsonString)));
+//             console.log(encodedData);
+//             $('#ymm-continue').attr('href', `/your-offer?id=${encodedData}`);
+//       });
+//     }
+// });
+// });
+// </script>

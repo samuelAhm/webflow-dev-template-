@@ -2,13 +2,82 @@ window.Webflow ||= [];
 window.Webflow.push(() => {
   console.log('Master solution');
 
-  const allSLides = document.querySelectorAll('[slide-in]');
-  gsap.set(allSLides, { visibility: 'hidden' });
-  const heroTl = gsap.timeline({ ease: 'power4.out' });
+  function isMobile() {
+    return window.innerWidth < 479;
+  }
 
-  heroTl
-    .from(allSLides, { yPercent: 120, autoAlpha: 0, stagger: 0.2, duration: 1.5 })
-    .from('[slide-img]', { xPercent: 100, autoAlpha: 0, duration: 1.5 }, '<');
+  const customTab1 = document.querySelector('[custom-tab1]');
+
+  const tabFunction = function (tabCompWrap) {
+    const tabs = [...tabCompWrap.querySelectorAll('[tab-panel]')];
+    const tabsContent = [...tabCompWrap.querySelectorAll('[tab-content]')];
+
+    tabs.forEach((activeTab, i) => {
+      activeTab.addEventListener('click', () => {
+        ///add active class to clicked tab
+        const restTab = tabs.filter((tab) => tab !== activeTab);
+        restTab.forEach((a) => {
+          a.classList.remove('tab-active');
+        });
+        activeTab.classList.add('tab-active');
+
+        tabsContent.forEach((content) => {
+          content.classList.remove('tab-active');
+        });
+
+        //get tab attribute
+        const activeTabAtt = activeTab.getAttribute('tab-panel');
+        const matchContent = tabsContent.find(
+          (content) => content.getAttribute('tab-content') === activeTabAtt
+        );
+
+        const tabTl = gsap.timeline();
+
+        if (matchContent) {
+          matchContent.classList.add('tab-active');
+
+          tabTl.to(tabsContent, { opacity: 0, duration: 0 });
+          tabTl.to(matchContent, { opacity: 1, duration: 0, ease: 'expo.out' });
+        }
+
+        /////
+        if (isMobile()) {
+          console.log('hello');
+          const tabWrap = tabCompWrap?.querySelector('[tab-menuwrap]');
+          const mbTabTrigger = tabCompWrap?.querySelector('[mb-tabTrigger]');
+          const textValue = tabCompWrap?.querySelector('[tab-text]');
+
+          console.log(mbTabTrigger);
+
+          mbTabTrigger?.addEventListener('click', () => {
+            tabWrap?.classList.add('mb-show');
+            console.log('click');
+          });
+
+          if (tabWrap.classList.contains('mb-show')) {
+            //get the text el
+            const tabText = activeTab.querySelector('.tb-text')?.textContent;
+            textValue.textContent = tabText;
+            tabWrap?.classList.remove('mb-show');
+          }
+        }
+      });
+    });
+
+    //get the index of the activeTab
+    const indexofActive = tabs.findIndex((tab) => tab.classList.contains('tab-active'));
+    tabs[indexofActive].click();
+  };
+
+  tabFunction(customTab1);
+
+  // const allSLides = document.querySelectorAll('[slide-in]');
+  // gsap.set(allSLides, { visibility: 'hidden' });
+  // const heroTl = gsap.timeline({ ease: 'power4.out' });
+
+  // heroTl
+  //   .from(allSLides, { yPercent: 120, autoAlpha: 0, stagger: 0.2, duration: 1.5 })
+  //   .from('[slide-img]', { xPercent: 100, autoAlpha: 0, duration: 1.5 }, '<');
 
   // const fullText1 = `Master Solutions streamlined everything for me. Files are no longer getting lost, heavy files are easily transferred, and members of the team are able to instantly access the latest version of documents from a secure cloud. I also think that you can’t find the passion of Master Solutions anywhere else – they clearly love what they do, and it makes all the difference. I see this kind of IT support as an essential need for any business.”`;
 
